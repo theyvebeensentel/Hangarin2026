@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="page-title">Tasks Overview</div>
+
+<!-- Metrics Row with Active State Indicators -->
+<div class="metrics-grid">
+    <a href="{% url 'task_list' %}" 
+       class="metric-card orange {% if not status_filter and not priority_filter and not request.GET.status and not request.GET.priority %}active{% endif %}">
+        <div class="metric-info">
+            <div class="label">Total Tasks</div>
+            <div class="number">{{ total_tasks_count }}</div>
+        </div>
+        <div class="metric-icon">📋</div>
+    </a>
+
+    <a href="{% url 'task_list' %}?status=Pending" 
+       class="metric-card yellow {% if status_filter|lower == 'pending' or request.GET.status|lower == 'pending' %}active{% endif %}">
+        <div class="metric-info">
+            <div class="label">Pending</div>
+            <div class="number">{{ pending_count }}</div>
+        </div>
+        <div class="metric-icon">⏸</div>
+    </a>
+
+    <a href="{% url 'task_list' %}?status=In Progress" 
+       class="metric-card blue {% if status_filter|lower == 'in progress' or request.GET.status|lower == 'in progress' %}active{% endif %}">
+        <div class="metric-info">
+            <div class="label">In Progress</div>
+            <div class="number">{{ in_progress_count }}</div>
+        </div>
+        <div class="metric-icon">⏳</div>
+    </a>
+
+    <a href="{% url 'task_list' %}?status=Upcoming" 
+       class="metric-card purple {% if status_filter|lower == 'upcoming' or request.GET.status|lower == 'upcoming' %}active{% endif %}">
+        <div class="metric-info">
+            <div class="label">Upcoming</div>
+            <div class="number">{{ upcoming_count }}</div>
+        </div>
+        <div class="metric-icon">📅</div>
+    </a>
+
+    <a href="{% url 'task_list' %}?status=Completed" 
+       class="metric-card green {% if status_filter|lower == 'completed' or request.GET.status|lower == 'completed' %}active{% endif %}">
+        <div class="metric-info">
+            <div class="label">Completed</div>
+            <div class="number">{{ completed_count }}</div>
+        </div>
+        <div class="metric-icon">✓</div>
+    </a>
+
+    <a href="{% url 'task_list' %}?priority=High" 
+       class="metric-card red {% if priority_filter|lower == 'high' or request.GET.priority|lower == 'high' %}active{% endif %}">
+        <div class="metric-info">
+            <div class="label">High Priority</div>
+            <div class="number">{{ high_priority_count }}</div>
+        </div>
+        <div class="metric-icon">🚩</div>
+    </a>
+</div>
+
+<div class="card">
+    <div class="toolbar">
+        <h3 style="font-size: 16px; color: #475569;">List of Tasks</h3>
+        <a href="{% url 'task_create' %}" class="btn-add">+ Add Task</a>
+    </div>
+
+    <!-- Search Bar -->
+    <form method="get" class="search-container">
+        <input type="text" name="q" value="{{ query }}" class="search-input" placeholder="Search tasks...">
+        {% if status_filter %}<input type="hidden" name="status" value="{{ status_filter }}">{% endif %}
+        {% if priority_filter %}<input type="hidden" name="priority" value="{{ priority_filter }}">{% endif %}
+        <button type="submit" class="btn-search">Search</button>
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for task in page_obj %}
+            <tr>
+                <td>
+                    <strong>{{ task.title }}</strong>
+                    <div style="font-size: 12px; color: #64748b; margin-top: 2px;">{{ task.description|truncatewords:8 }}</div>
+                </td>
+                <td>{{ task.category.name|default:"-" }}</td>
+                <td>{{ task.priority.name|default:"-" }}</td>
+                <td>{{ task.status }}</td>
+                <td>
+                    <a href="{% url 'task_update' task.id %}" class="action-edit">Edit</a>
+                    <a href="{% url 'task_delete' task.id %}" class="action-delete">Delete</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="text-align: center; color: #94a3b8;">No tasks found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Pagination Controls -->
+    <div class="pagination-container">
+        <div class="pagination-info">Showing {{ page_obj.object_list|length }} entries</div>
+
+        {% if page_obj.has_other_pages %}
+        <ul class="pagination-nav">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if priority_filter %}&priority={{ priority_filter }}{% endif %}">Previous</a>
+                </li>
+            {% else %}
+                <li class="page-item disabled"><span class="page-link">Previous</span></li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                {% else %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if priority_filter %}&priority={{ priority_filter }}{% endif %}">{{ num }}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if priority_filter %}&priority={{ priority_filter }}{% endif %}">Next</a>
+                </li>
+            {% else %}
+                <li class="page-item disabled"><span class="page-link">Next</span></li>
+            {% endif %}
+        </ul>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

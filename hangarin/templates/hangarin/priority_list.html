@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="page-title">Priorities Overview</div>
+
+<div class="card">
+    <div class="toolbar">
+        <h3 style="font-size: 16px; color: #475569;">List of Priorities</h3>
+        <a href="{% url 'priority_create' %}" class="btn-add">+ Add Priority</a>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th style="width: 150px;">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for priority in priorities %}
+            <tr>
+                <td><strong>{{ priority.name }}</strong></td>
+                <td>
+                    <a href="{% url 'priority_update' priority.id %}" class="action-edit">Edit</a>
+                    <a href="{% url 'priority_delete' priority.id %}" class="action-delete">Delete</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="2" style="text-align: center; color: #94a3b8;">No priorities found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
