@@ -218,7 +218,7 @@
                         <span>{{ user.username|default:"Account" }}</span> ▼
                     </button>
                     <div class="dropdown-menu">
-                        <form action="{% url 'logout' %}" method="post">
+                        <form action="{% url 'account_logout' %}" method="post">
                             {% csrf_token %}
                             <button type="submit" class="dropdown-item">Log Out</button>
                         </form>
